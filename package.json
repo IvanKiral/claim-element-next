@@ -2,11 +2,13 @@
   "name": "kontent-ai-next-items-queue",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "model:generate": "npx tsx scripts/generateModel.ts"
   },
   "dependencies": {
     "@kontent-ai/delivery-sdk": "^16.2.1",
@@ -24,6 +26,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.1",
     "tailwindcss": "^4",
