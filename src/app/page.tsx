@@ -1,6 +1,6 @@
 "use client";
 ;
-import { useEnvironmentId, useItemInfo, useVariantInfo, useUserContext, CustomElementContext } from "./customElement/CustomElementContext.tsx";
+import { useEnvironmentId, useItemInfo, useVariantInfo, useUserContext, CustomElementContext, useConfig } from "./customElement/CustomElementContext.tsx";
 import dynamic from 'next/dynamic'
 import { QueryClient, QueryClientProvider, useMutation, useQuery } from "@tanstack/react-query";
 import { GetItemResponse } from "./shared/types/routes.ts";
@@ -30,6 +30,7 @@ const CustomElement = () => {
   const item = useItemInfo();
   const variant = useVariantInfo();
   const userContext = useUserContext();
+  const config = useConfig();
 
   const data = useQuery({
     queryKey: ["item"],
@@ -47,6 +48,9 @@ const CustomElement = () => {
           languageCodename: payload.languageCodename,
           userEmail: userContext?.email,
           environmentId,
+          contentEditorRole: config.contentEditorRole,
+          assignedStepCodename: config.assignedStepCodename,
+          unassignedStepCodename: config.unassignedStepCodename,
         }),
         headers: { "Content-Type": "application/json" },
       }).then(r => r.json()),
@@ -64,6 +68,7 @@ const CustomElement = () => {
           languageCodename: payload.languageCodename,
           userId: userContext?.id,
           environmentId,
+          unassignedStepCodename: config.unassignedStepCodename,
         }),
         headers: { "Content-Type": "application/json" },
       }).then(r => r.json()),
@@ -99,7 +104,7 @@ const CustomElement = () => {
       <main >
         <button
           type="button"
-          disabled={assignItemMutation.isPending || data.data?.workflow.step_identifier.codename === "locked"}
+          disabled={assignItemMutation.isPending || data.data?.workflow.step_identifier.codename === config.assignedStepCodename}
           onClick={() => assignItemMutation.mutate({ itemCodename: item.codename, languageCodename: variant.codename })}
           className="border-2 border-[#5b4ff5] rounded-full px-6 py-2 hover:bg-[#5b4ff5] disabled:bg-[#8C8C8C] disabled:border-[#8C8C8C] not-disabled:hover:text-white bg-white text-black font-bold ml-auto tracking-widest uppercase transition-colors duration-150"
         >
