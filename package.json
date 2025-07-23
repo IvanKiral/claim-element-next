@@ -21,7 +21,6 @@
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
     "@eslint/eslintrc": "^3",
-    "@kontent-ai/biome-config": "^0.4.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
