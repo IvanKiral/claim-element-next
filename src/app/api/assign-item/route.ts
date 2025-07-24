@@ -16,7 +16,7 @@ if (!subscriptionApiKey) {
 }
 
 export const POST = async (request: Request) => {
-	const { environmentId, itemCodename, languageCodename, userEmail } =
+	const { environmentId, itemCodename, languageCodename, userEmail, contentEditorRole, assignedStepCodename, unassignedStepCodename } =
 		await request.json();
 
 	if (!itemCodename) {
@@ -42,6 +42,12 @@ export const POST = async (request: Request) => {
 			{ error: "Environment ID is required" },
 			{ status: 400 },
 		);
+	}
+	if(!contentEditorRole) {
+		return Response.json({ error: "Content editor role is required" }, { status: 400 });
+	}
+	if(!assignedStepCodename) {
+		return Response.json({ error: "Step codename is required" }, { status: 400 });
 	}
 
 	const client = createManagementClient({
@@ -88,7 +94,7 @@ export const POST = async (request: Request) => {
 		variant.contributors.some((c) => {
 			const filteredRoles = envUserRoles.filter((u) => u.id === c.id);
 
-			return filteredRoles.some((r) => r.codename === "content_editor");
+			return filteredRoles.some((r) => r.codename === contentEditorRole);
 		})
 	) {
 		return Response.json(
@@ -106,11 +112,11 @@ export const POST = async (request: Request) => {
 		.byItemCodename(itemCodename)
 		.byLanguageCodename(languageCodename)
 		.withData(() => ({
-			...variant._raw,
+			elements:[],
 			contributors: [...variant.contributors, { email: userEmail }],
 			workflow: {
 				...variant._raw.workflow,
-				step_identifier: { codename: "locked" },
+				step_identifier: { codename: assignedStepCodename },
 			},
 		}))
 		.toPromise();

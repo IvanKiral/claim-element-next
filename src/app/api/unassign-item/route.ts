@@ -6,7 +6,7 @@ if (!managementApiKey) {
 }
 
 export const POST = async (request: Request) => {
-	const { environmentId, itemCodename, languageCodename, userId } =
+	const { environmentId, itemCodename, languageCodename, userId, unassignedStepCodename } =
 		await request.json();
 
 	if (!itemCodename) {
@@ -32,6 +32,9 @@ export const POST = async (request: Request) => {
 			{ error: "Environment ID is required" },
 			{ status: 400 },
 		);
+	}
+	if(!unassignedStepCodename) {
+		return Response.json({ error: "Unassigned step codename is required" }, { status: 400 });
 	}
 
 	const client = createManagementClient({
@@ -62,11 +65,11 @@ export const POST = async (request: Request) => {
 		.byItemCodename(itemCodename)
 		.byLanguageCodename(languageCodename)
 		.withData(() => ({
-			...variant._raw,
+			elements:[],
 			contributors: variant.contributors.filter((u) => u.id !== userId),
 			workflow: {
 				...variant._raw.workflow,
-				step_identifier: { codename: "draft" },
+				step_identifier: { codename: unassignedStepCodename },
 			},
 		}))
 		.toPromise();
