@@ -16,8 +16,14 @@ if (!subscriptionApiKey) {
 }
 
 export const POST = async (request: Request) => {
-	const { environmentId, itemCodename, languageCodename, userEmail, contentEditorRole, assignedStepCodename, unassignedStepCodename } =
-		await request.json();
+	const {
+		environmentId,
+		itemCodename,
+		languageCodename,
+		userEmail,
+		contentEditorRole,
+		assignedStepCodename,
+	} = await request.json();
 
 	if (!itemCodename) {
 		return Response.json(
@@ -43,11 +49,17 @@ export const POST = async (request: Request) => {
 			{ status: 400 },
 		);
 	}
-	if(!contentEditorRole) {
-		return Response.json({ error: "Content editor role is required" }, { status: 400 });
+	if (!contentEditorRole) {
+		return Response.json(
+			{ error: "Content editor role is required" },
+			{ status: 400 },
+		);
 	}
-	if(!assignedStepCodename) {
-		return Response.json({ error: "Step codename is required" }, { status: 400 });
+	if (!assignedStepCodename) {
+		return Response.json(
+			{ error: "Step codename is required" },
+			{ status: 400 },
+		);
 	}
 
 	const client = createManagementClient({
@@ -112,7 +124,7 @@ export const POST = async (request: Request) => {
 		.byItemCodename(itemCodename)
 		.byLanguageCodename(languageCodename)
 		.withData(() => ({
-			elements:[],
+			elements: [],
 			contributors: [...variant.contributors, { email: userEmail }],
 			workflow: {
 				...variant._raw.workflow,
