@@ -5,5 +5,4 @@ export type Config = Readonly<{
   unassignedStepCodename: string;
 }>;
 
-export const isConfig = (value: Readonly<Record<string, unknown>> | null) =>
-  value !== null; // use better check
+export const isConfig = (value: Readonly<Record<string, unknown>> | null) => value !== null; // use better check
