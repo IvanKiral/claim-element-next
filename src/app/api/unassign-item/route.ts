@@ -2,81 +2,69 @@ import { createManagementClient } from "@kontent-ai/management-sdk";
 
 const managementApiKey = process.env.KONTENT_AI_MANAGEMENT_KEY;
 if (!managementApiKey) {
-	throw new Error("KONTENT_AI_MANAGEMENT_KEY is not set");
+  throw new Error("KONTENT_AI_MANAGEMENT_KEY is not set");
 }
 
 export const POST = async (request: Request) => {
-	const { environmentId, itemCodename, languageCodename, userId, unassignedStepCodename } =
-		await request.json();
+  const { environmentId, itemCodename, languageCodename, userId, unassignedStepCodename } =
+    await request.json();
 
-	if (!itemCodename) {
-		return Response.json(
-			{ error: "Item codename is required" },
-			{ status: 400 },
-		);
-	}
+  if (!itemCodename) {
+    return Response.json({ error: "Item codename is required" }, { status: 400 });
+  }
 
-	if (!languageCodename) {
-		return Response.json(
-			{ error: "Language codename is required" },
-			{ status: 400 },
-		);
-	}
+  if (!languageCodename) {
+    return Response.json({ error: "Language codename is required" }, { status: 400 });
+  }
 
-	if (!userId) {
-		return Response.json({ error: "User email is required" }, { status: 400 });
-	}
+  if (!userId) {
+    return Response.json({ error: "User email is required" }, { status: 400 });
+  }
 
-	if (!environmentId) {
-		return Response.json(
-			{ error: "Environment ID is required" },
-			{ status: 400 },
-		);
-	}
-	if(!unassignedStepCodename) {
-		return Response.json({ error: "Unassigned step codename is required" }, { status: 400 });
-	}
+  if (!environmentId) {
+    return Response.json({ error: "Environment ID is required" }, { status: 400 });
+  }
+  if (!unassignedStepCodename) {
+    return Response.json({ error: "Unassigned step codename is required" }, { status: 400 });
+  }
 
-	const client = createManagementClient({
-		apiKey: managementApiKey,
-		environmentId,
-	});
+  const client = createManagementClient({
+    apiKey: managementApiKey,
+    environmentId,
+  });
 
-	const variant = await client
-		.viewLanguageVariant()
-		.byItemCodename(itemCodename)
-		.byLanguageCodename(languageCodename)
-		.toPromise()
-		.then((res) => res.data);
+  const variant = await client
+    .viewLanguageVariant()
+    .byItemCodename(itemCodename)
+    .byLanguageCodename(languageCodename)
+    .toPromise()
+    .then((res) => res.data);
 
-	if (!variant) {
-		return Response.json({ error: "Variant not found" }, { status: 404 });
-	}
+  if (!variant) {
+    return Response.json({ error: "Variant not found" }, { status: 404 });
+  }
 
-	if (!variant.contributors.some((u) => u.id === userId)) {
-		return Response.json(
-			{ error: "User is not assigned to this item" },
-			{ status: 400 },
-		);
-	}
+  if (!variant.contributors.some((u) => u.id === userId)) {
+    return Response.json({ error: "User is not assigned to this item" }, { status: 400 });
+  }
 
-	const result = await client
-		.upsertLanguageVariant()
-		.byItemCodename(itemCodename)
-		.byLanguageCodename(languageCodename)
-		.withData(() => ({
-			elements:[],
-			contributors: variant.contributors.filter((u) => u.id !== userId),
-			workflow: {
-				...variant._raw.workflow,
-				step_identifier: { codename: unassignedStepCodename },
-			},
-		}))
-		.toPromise();
+  const result = await client
+    .upsertLanguageVariant()
+    .byItemCodename(itemCodename)
+    .byLanguageCodename(languageCodename)
+    .withData(() => ({
+      elements: [],
+      contributors: variant.contributors.filter((u) => u.id !== userId),
+      workflow: {
+        ...variant._raw.workflow,
+        step_identifier: { codename: unassignedStepCodename },
+      },
+    }))
+    .toPromise();
 
-	if (!result.data.item.id) {
-		return Response.json({ error: "Item not found" }, { status: 404 });
-	}
+  if (!result.data.item.id) {
+    return Response.json({ error: "Item not found" }, { status: 404 });
+  }
 
-	return Response.json({ status: 200 });
+  return Response.json({ status: 200 });
 };
